@@ -55,7 +55,7 @@ CXXFLAGS   := -DCUDA_MAJOR=$(CUDA_MAJOR) -DCUDA_MINOR=$(CUDA_MINOR) -fPIC -fvisi
 # Maxrregcount needs to be set accordingly to NCCL_MAX_NTHREADS (otherwise it will cause kernel launch errors)
 # 512 : 120, 640 : 96, 768 : 80, 1024 : 60
 # We would not have to set this if we used __launch_bounds__, but this only works on kernels, not on functions.
-NVCUFLAGS  := -ccbin $(CXX) $(NVCC_GENCODE) -std=c++11 --expt-extended-lambda -Xptxas -maxrregcount=96 -Xfatbin -compress-all
+NVCUFLAGS  := $(NVCCFLAGS) $(NVCC_GENCODE) -std=c++11 --expt-extended-lambda -Xptxas -maxrregcount=96 -Xfatbin -compress-all
 # Use addprefix so that we can specify more than one path
 NVLDFLAGS  := -L${CUDA_LIB} -lcudart -lrt
 
@@ -68,14 +68,6 @@ LDFLAGS   += ${GCOV_FLAGS}
 NVLDFLAGS   += ${GCOV_FLAGS:%=-Xcompiler %}
 # $(warning GCOV_FLAGS=${GCOV_FLAGS})
 ########## GCOV ##########
-
-ifeq ($(DEBUG), 0)
-NVCUFLAGS += -O3
-CXXFLAGS  += -O3 -g
-else
-NVCUFLAGS += -O0 -G -g
-CXXFLAGS  += -O0 -g -ggdb3
-endif
 
 ifneq ($(VERBOSE), 0)
 NVCUFLAGS += -Xptxas -v -Xcompiler -Wall,-Wextra,-Wno-unused-parameter
